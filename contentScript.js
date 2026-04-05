@@ -96,11 +96,12 @@ async function checkTTBlocked() {
   return new Promise((resolve, reject) => {
     const CB = setInterval(() => {
       let div = document.querySelector(
-        'div[class="css-1h3j14u-DivFollowButtonWrapper e18e4obn4"]'
+        //'div[class="css-ylo4fp-7937d88b--DivActionOutsideContainer e1ytbjv80"]'
+        '[data-e2e="follow-button"]' // button or div
       );
 
       if (div) {
-        const btns = div.querySelectorAll("button");
+        const btns = div.querySelectorAll("div");
         let blockedBtn;
         for (let btn of btns) {
           if (btn.textContent.trim() === "Unblock") {
@@ -124,7 +125,7 @@ async function checkTTBlocked() {
 
 async function blockTTAccount() {
   return new Promise((resolve, reject) => {
-    const hoverButton = document.querySelector('div[data-e2e="user-more"]');
+    const hoverButton = document.querySelector('button[data-e2e="user-more"]');
     hoverButton.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
     // Wait for the menu to appear
     setTimeout(() => {
@@ -158,9 +159,22 @@ async function blockTTAccount() {
 async function hoverTTOptionBtn() {
   return new Promise((resolve, reject) => {
     const COB = setInterval(() => {
-      const hoverButton = document.querySelector('div[data-e2e="user-more"]');
+      const hoverButton = document.querySelector('button[data-e2e="user-more"]');
       if (hoverButton) {
         hoverButton.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        clearInterval(COB);
+        resolve();
+      }
+    }, CLICK_OPTION_BUTTON_TIMER);
+  });
+}
+
+async function clickTTMoreBtn() {
+  return new Promise((resolve, reject) => {
+    const COB = setInterval(() => {
+      const moreButton = document.querySelector('button[data-e2e="user-more"]');
+      if (moreButton) {
+        moreButton.click();
         clearInterval(COB);
         resolve();
       }
@@ -189,7 +203,7 @@ async function clickTTConfirmBlockBtn() {
         confirmBlockButton.click();
         clearInterval(CoBB);
         resolve();
-      } 
+      }
     }, CONFIRM_BLOCK_BUTTON_TIMER);
   });
 }
@@ -366,8 +380,10 @@ function getAccountType(url){
         await sendMessage("proceed");
         return;
       }
-      await waitRandomSeconds(); 
+      await waitRandomSeconds();
       await hoverTTOptionBtn();
+      // user needs to click the 'more' button
+      await clickTTMoreBtn();
       await waitRandomSeconds(); 
       await clickTTBlockBtn();
       await waitRandomSeconds(); 
